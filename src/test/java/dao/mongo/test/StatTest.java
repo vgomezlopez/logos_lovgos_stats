@@ -40,9 +40,9 @@ public class StatTest {
 	User u2 = usersService.getUserByID("5af466f4e946ca11a8576855");
 	System.out.println(u2);
 	
-	
+//	usersService.updateUserConnection(u2,LogosLovgosConnection.NotConnected.getLogosLovgosConnection());
 		
-		
+	usersService.deleteUser(u2);
 
 	}
 }

@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import dao.mongo.entity.LogosLovgosConnection;
 import dao.mongo.entity.LovgosMotif;
 import dao.mongo.entity.User;
 
@@ -26,38 +27,28 @@ public class UsersService  {
 		this.mongoOps = mongoOps;
 	}
 
-//	public UsersService() {
-//		MongoClient mongoClient = new MongoClient("localhost", 27017);
-//		MongoDatabase db = mongoClient.getDatabase("test");
-//		MongoCollection<Document> coll = db.getCollection("users");
-//	}
-
-	public void createUser(User user) {
-		mongoOps.insert(user);
-	}
-
-	public void updateUserConnection(User user, String connect) {
-////		User userNew = userOld;
-////		userNew.setLogLovConnected(LogosLovgosConnection.NotConnected.getLogosLovgosConnection());
-////		Document doc = createDocumentUser(userNew);
-//
-//		BasicDBObject queryGetUser = new BasicDBObject("_id", user.get_id());
-//		BasicDBObject connection = new BasicDBObject();
-//		
-//		connection.put("connection", connect.toString());
-//		System.out.println(connection);
-//		UpdateResult resultUpdate = coll.updateOne(queryGetUser, connection);
-//		
-//		return resultUpdate;
-//
-	}
-
-
+	
 	public User getUserByID(String id){
 		Query query = new Query(Criteria.where("_id").is(id));
 		return  mongoOps.findOne(query, User.class);
 	}
 
+
+	public void updateUserConnection(User user, String connect) {
+		user.setConnection(connect);
+		mongoOps.save(user);
+	}
+
+
+	
+	public void createUser(User user) {
+		mongoOps.insert(user);
+	}
+	
+	public void deleteUser(User user) {
+		Query query = new Query(Criteria.where("_id").is(user.get_id()));
+		mongoOps.remove(query, User.class);
+	}
 
 
 
