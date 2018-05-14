@@ -24,12 +24,12 @@ public class AppConfig {
 	
 	 @Bean 
 	public MongoDbFactory mongoDbFactory() throws UnknownHostException {
-		return new SimpleMongoDbFactory(mongoClient(), "logos_stats");
+		return new SimpleMongoDbFactory(mongoClient(), "logos"); // nom de la BDD
 	}
 	
 	@Bean
 	public MongoOperations mongoOp(Mongo mongo) {
-		MongoTemplate mongoTemplate = new MongoTemplate(mongo, "logos_stats"); // nom de la BDD
+		MongoTemplate mongoTemplate = new MongoTemplate(mongo, "logos"); // nom de la BDD
 		return mongoTemplate;
 	}
 

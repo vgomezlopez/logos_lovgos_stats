@@ -9,8 +9,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import dao.mongo.entity.LogosLovgosConnection;
-import dao.mongo.entity.LovgosMotif;
 import dao.mongo.entity.User;
 
 import com.mongodb.BasicDBObject;
@@ -28,16 +26,20 @@ public class UsersService  {
 	}
 
 	
-	public User getUserByID(String id){
+	public User getUserByID(Integer id){
 		Query query = new Query(Criteria.where("_id").is(id));
 		return  mongoOps.findOne(query, User.class);
 	}
-
-
-	public void updateUserConnection(User user, String connect) {
-		user.setConnection(connect);
-		mongoOps.save(user);
+	
+	public List<User> getAllUsers() {
+		return mongoOps.findAll(User.class);
 	}
+
+
+//	public void updateUserConnection(User user, String connect) {
+//		user.setConnection(connect);
+//		mongoOps.save(user);
+//	}
 
 
 	

@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -26,6 +29,8 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.json.JSONObject;
 
+import dao.mongo.entity.User;
+import front.elastic.users.Eleves;
 import front.elastic.users.ElevesLovegos;
 import front.elastic.users.Utilisateur;
 import io.netty.handler.codec.json.JsonObjectDecoder;
@@ -33,8 +38,8 @@ import io.netty.handler.codec.json.JsonObjectDecoder;
 public class ManageUsers {
 
 	private TransportClient client;
-	private String index = "eleveslovegos11";
-	private String type = "eleves";
+	private String index = "users1";
+	private String type = "user";
 
 
 	@SuppressWarnings({ "resource", "unchecked" })
@@ -50,7 +55,7 @@ public class ManageUsers {
 				HttpClient client1 = new DefaultHttpClient();
 				HttpPut put = new HttpPut(url);
 				put.setHeader("Content-Type","application/json");
-				StringEntity entity = new StringEntity("{\"mappings\": {\"eleves\": {\"properties\": {\"geoLoc\": {\"type\": \"geo_point\"}}}}}");
+				StringEntity entity = new StringEntity("{\"mappings\": {\"user\": {\"properties\": {\"geoLocation\": {\"type\": \"geo_point\"}}}}}");
 				put.setEntity(entity);
 				HttpResponse response1= client1.execute(put);
 				System.out.println(response1.getStatusLine().getStatusCode());
@@ -62,12 +67,7 @@ public class ManageUsers {
 					result.append(line);
 				}
 				System.out.println(result.toString());
-				
 			}
-			
-			
-			
-
 		} catch (UnknownHostException e) {
 			System.out.println("Erreur de connection à Elastic Search");
 			e.printStackTrace();
@@ -75,16 +75,31 @@ public class ManageUsers {
 
 	}
 
-
-	// CREATION DOCUMENT DANS ELASTICSEARCH
-	public void addElevesLovegos(ElevesLovegos u, Integer id) throws IOException {
-
+	public void addUser(User u) throws IOException {
+		if(u.getType().equalsIgnoreCase("eleve")) {
+			addEleve(u);
+		} else if (u.getType().equalsIgnoreCase("eleveLovegos")) {
+			addElevesLovegos(u);
+		}else {
+			addProf(u);
+		}
+	}
+	
+	public void deleteUtilisateur(Integer id) {
+		client.prepareDelete(index, type,id.toString()).get();
+	}
+	
+	
+	
+	//méthodes pour ajouter un user quel que soit son type
+	private void addElevesLovegos(User user) throws IOException {
+		ElevesLovegos u = convertToEleveLovegosElastic(user);
 		XContentBuilder xb =  XContentFactory.jsonBuilder().startObject();
 		xb.field("connection", u.getConnection())
 		.field("type", u.getType())
 		.field("age", u.getAge())
 		.field("genre",u.getGenre())
-		.field("geoLoc",u.getGeoLoc())
+		.field("geoLocation",u.getGeoLoc())
 		.field("statutPremium",u.isStatutPremium());
 
 		xb.startArray("motifs");
@@ -94,13 +109,67 @@ public class ManageUsers {
 		xb.endArray();
 
 		xb.endObject();
-		client.prepareIndex(index,type, id.toString()).setSource(xb).get();
+		client.prepareIndex(index,type, u.getId().toString()).setSource(xb).get();
 
 	}
+	
+	private void addEleve(User user) throws IOException {
+		Eleves e = convertToEleveElastic(user);
+		XContentBuilder xb =  XContentFactory.jsonBuilder().startObject();
+		xb.field("connection", e.getConnection())
+		.field("type", e.getType())
+		.field("age", e.getAge())
+		.field("genre",e.getGenre())
+		.field("geoLocation",e.getGeoLoc())
+		.field("statutPremium",e.isStatutPremium());
+		xb.endObject();
+		client.prepareIndex(index,type, e.getId().toString()).setSource(xb).get();
 
-	public void deleteUtilisateur(Integer id) {
-		client.prepareDelete(index, type,id.toString()).get();
 	}
+	
+	private void addProf(User user) throws IOException {
+		Utilisateur prof = convertToProfElastic(user);
+		XContentBuilder xb =  XContentFactory.jsonBuilder().startObject();
+		xb.field("connection", prof.getConnection())
+		.field("type", prof.getType())
+		.field("age", prof.getAge())
+		.field("genre",prof.getGenre())
+		.field("geoLocation",prof.getGeoLoc());
+		xb.endObject();
+		client.prepareIndex(index,type, prof.getId().toString()).setSource(xb).get();
+	}
+	
+	private Utilisateur convertToProfElastic(User user) {
+		GeoPoint geo = new GeoPoint(user.getGeoLoc().getLat(),user.getGeoLoc().getLon());
+		int age = calculateAge(user.getDateNaissance(),LocalDate.now());
+		return new Utilisateur(user.get_id(), "logos", user.getType(), age, user.getGenre(), geo);
+	}
+	
+	private Eleves convertToEleveElastic(User user) {
+		GeoPoint geo = new GeoPoint(user.getGeoLoc().getLat(),user.getGeoLoc().getLon());
+		int age = calculateAge(user.getDateNaissance(),LocalDate.now());
+		return new Eleves(user.get_id(), "logos", user.getType(), age, user.getGenre(), geo, user.getStatutPremium());
+	}
+	
+	private ElevesLovegos convertToEleveLovegosElastic(User user) {
+		List<String> motifs = new ArrayList<String>();
+		for (int i=0;i< user.getMotif().length;i++) {
+			motifs.add(user.getMotif()[i]);
+		}
+		GeoPoint geo = new GeoPoint(user.getGeoLoc().getLat(),user.getGeoLoc().getLon());
+		int age = calculateAge(user.getDateNaissance(),LocalDate.now());
+		return new ElevesLovegos(user.get_id(), "logos", user.getType(), age, user.getGenre(), geo, user.getStatutPremium(),motifs);
+	}
+	
+	private static int calculateAge(LocalDate birthDate, LocalDate currentDate) {
+        if ((birthDate != null) && (currentDate != null)) {
+            return Period.between(birthDate, currentDate).getYears();
+        } else {
+            return 0;
+        }
+    }
+
+	
 
 
 }

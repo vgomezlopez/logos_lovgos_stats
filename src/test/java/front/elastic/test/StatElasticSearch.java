@@ -19,31 +19,41 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import dao.mongo.entity.User;
+import dao.mongo.services.UsersService;
 import front.elastic.services.ManageUsers;
 import front.elastic.users.ElevesLovegos;
 
 public class StatElasticSearch {
 
 	public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-
 		ManageUsers m = new ManageUsers();
+		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("mongo-context.xml");
+		UsersService usersService = ctx.getBean(UsersService.class);
+		
+		List<User> liste = usersService.getAllUsers();
+		
+		List<User> liste1 = new ArrayList<User>();
+		liste1.add(usersService.getUserByID(1));
+		liste1.add(usersService.getUserByID(1003));
+		liste1.add(usersService.getUserByID(14500));
+		liste1.add(usersService.getUserByID(13544));
+		liste1.add(usersService.getUserByID(12555));
+		liste1.add(usersService.getUserByID(10200));
+		liste1.add(usersService.getUserByID(11544));
+		for(User u: liste1) {
+			System.out.println(u);
+			m.addUser(u);
+//			m.deleteUtilisateur(u.get_id());
+		}
+		
 
-		// CREATION DOCUMENT
-		
-		List<String> motifs = Arrays.asList("serieux", "peuImporte", "amuser");
-//		GeoLocation  geo = new GeoLocation(44.8167d,4.5833d);
-		GeoPoint geo = new GeoPoint(44.8167,4.5833);
-		
-		ElevesLovegos e = new ElevesLovegos(3, "logos", "eleveLovegos", 32, "M", geo, true,motifs);
-		m.addElevesLovegos(e,e.getId());
-		
 		
 
-		// GET DOCUMENT IN ELASTICSEARCH
-//		GetResponse responseGet = client.prepareGet("eleves_lovegos2", "eleves", "1").get();
-//		System.out.println(responseGet);
-//		
+		
 //		// UPDATE DOCUMENT
 //		UpdateRequest updateRequest = new UpdateRequest();
 //		updateRequest.index("eleves_lovegos2");
@@ -58,8 +68,6 @@ public class StatElasticSearch {
 //		GetResponse response1 = client.prepareGet("eleves_lovegos2", "eleves", "1").get();
 //		System.out.println(response1);
 //		
-		// SUPPRESSION
-//		m.deleteUtilisateur(1);
 
 	}
 

@@ -9,19 +9,9 @@ public class Utilisateur {
 	private String type;
 	private Integer age;
 	private String genre;
-//	private GeoLocation geoLoc;
 	private GeoPoint geoLoc;
 
 
-//	public Utilisateur(Integer id, String connection, String type, Integer age, String genre, GeoLocation geoLoc) {
-//		super();
-//		this.id = id;
-//		this.connection = connection;
-//		this.type = type;
-//		this.age = age;
-//		this.genre = genre;
-//		this.geoLoc = geoLoc;
-//	}
 
 	public Utilisateur() {
 		super();
