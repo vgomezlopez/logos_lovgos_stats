@@ -35,13 +35,6 @@ public class UsersService  {
 		return mongoOps.findAll(User.class);
 	}
 
-
-//	public void updateUserConnection(User user, String connect) {
-//		user.setConnection(connect);
-//		mongoOps.save(user);
-//	}
-
-
 	
 	public void createUser(User user) {
 		mongoOps.insert(user);

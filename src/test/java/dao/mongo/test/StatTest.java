@@ -8,7 +8,9 @@ import java.util.concurrent.ExecutionException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import dao.mongo.entity.ConnectionUsers;
 import dao.mongo.entity.User;
+import dao.mongo.services.SessionService;
 import dao.mongo.services.UsersService;
 
 
@@ -17,7 +19,15 @@ public class StatTest {
 	public static void main(String[] args) throws IOException, InterruptedException, ExecutionException  {
 				ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("mongo-context.xml");
 				UsersService usersService = ctx.getBean(UsersService.class);
+				SessionService usersConnection = ctx.getBean(SessionService.class);
 				
+				ConnectionUsers c = usersConnection.getConnectionsByUserID(14500);
+//				System.out.println(c);
+				
+				List<ConnectionUsers> liste = usersConnection.getAllUserConnections();
+				for(ConnectionUsers u: liste) {
+					System.out.println(u);
+				}
 				
 		//		List<String> coordinates = new ArrayList<String>();
 		//		coordinates.add("15.45");
@@ -33,18 +43,18 @@ public class StatTest {
 		//		
 		////		usersService.createUser(u1);
 		//		
-			User u2 = usersService.getUserByID(15005);
-//			System.out.println(u2);
+			User u2 = usersService.getUserByID(14500);
+			System.out.println(u2);
 			
-			List<User> liste = usersService.getAllUsers();
-			for(User u: liste) {
-				System.out.println(u);
-			}
+//			List<User> liste = usersService.getAllUsers();
+//			for(User u: liste) {
+//				System.out.println(u);
+//			}
 
 		//	usersService.updateUserConnection(u2,LogosLovgosConnection.NotConnected.getLogosLovgosConnection());
 
 		//	usersService.deleteUser(u2);
-
+				
 
 	}
 }

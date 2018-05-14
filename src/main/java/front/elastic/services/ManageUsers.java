@@ -28,8 +28,13 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.json.JSONObject;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import dao.mongo.entity.ConnectionUsers;
 import dao.mongo.entity.User;
+import dao.mongo.services.SessionService;
+import dao.mongo.services.UsersService;
 import front.elastic.users.Eleves;
 import front.elastic.users.ElevesLovegos;
 import front.elastic.users.Utilisateur;
@@ -38,18 +43,23 @@ import io.netty.handler.codec.json.JsonObjectDecoder;
 public class ManageUsers {
 
 	private TransportClient client;
-	private String index = "users1";
+	private String index = "users2";
 	private String type = "user";
-
+	private SessionService sessionService;
 
 	@SuppressWarnings({ "resource", "unchecked" })
 	public ManageUsers() throws IOException {
+
+		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("mongo-context.xml");
+		sessionService = ctx.getBean(SessionService.class);
+
+
 		// se connecter à Elastic Search
 		try {
 			client= new PreBuiltTransportClient(Settings.EMPTY)
 					.addTransportAddress(new TransportAddress(InetAddress.getByName("localhost"), 9300))
 					.addTransportAddress(new TransportAddress(InetAddress.getByName("localhost"), 9301));
-			
+
 			String url = "http://localhost:9200/"+index;
 			if(new DefaultHttpClient().execute(new HttpGet(url)).getStatusLine().getStatusCode()==404) {
 				HttpClient client1 = new DefaultHttpClient();
@@ -59,7 +69,7 @@ public class ManageUsers {
 				put.setEntity(entity);
 				HttpResponse response1= client1.execute(put);
 				System.out.println(response1.getStatusLine().getStatusCode());
-				
+
 				BufferedReader rd = new BufferedReader(new InputStreamReader(response1.getEntity().getContent()));
 				StringBuffer result = new StringBuffer();
 				String line = "";
@@ -84,13 +94,13 @@ public class ManageUsers {
 			addProf(u);
 		}
 	}
-	
+
 	public void deleteUtilisateur(Integer id) {
 		client.prepareDelete(index, type,id.toString()).get();
 	}
-	
-	
-	
+
+
+
 	//méthodes pour ajouter un user quel que soit son type
 	private void addElevesLovegos(User user) throws IOException {
 		ElevesLovegos u = convertToEleveLovegosElastic(user);
@@ -112,7 +122,7 @@ public class ManageUsers {
 		client.prepareIndex(index,type, u.getId().toString()).setSource(xb).get();
 
 	}
-	
+
 	private void addEleve(User user) throws IOException {
 		Eleves e = convertToEleveElastic(user);
 		XContentBuilder xb =  XContentFactory.jsonBuilder().startObject();
@@ -126,7 +136,7 @@ public class ManageUsers {
 		client.prepareIndex(index,type, e.getId().toString()).setSource(xb).get();
 
 	}
-	
+
 	private void addProf(User user) throws IOException {
 		Utilisateur prof = convertToProfElastic(user);
 		XContentBuilder xb =  XContentFactory.jsonBuilder().startObject();
@@ -138,19 +148,19 @@ public class ManageUsers {
 		xb.endObject();
 		client.prepareIndex(index,type, prof.getId().toString()).setSource(xb).get();
 	}
-	
+
 	private Utilisateur convertToProfElastic(User user) {
 		GeoPoint geo = new GeoPoint(user.getGeoLoc().getLat(),user.getGeoLoc().getLon());
 		int age = calculateAge(user.getDateNaissance(),LocalDate.now());
-		return new Utilisateur(user.get_id(), "logos", user.getType(), age, user.getGenre(), geo);
+		return new Utilisateur(user.get_id(), getUserConnection(user), user.getType(), age, user.getGenre(), geo);
 	}
-	
+
 	private Eleves convertToEleveElastic(User user) {
 		GeoPoint geo = new GeoPoint(user.getGeoLoc().getLat(),user.getGeoLoc().getLon());
 		int age = calculateAge(user.getDateNaissance(),LocalDate.now());
-		return new Eleves(user.get_id(), "logos", user.getType(), age, user.getGenre(), geo, user.getStatutPremium());
+		return new Eleves(user.get_id(), getUserConnection(user), user.getType(), age, user.getGenre(), geo, user.getStatutPremium());
 	}
-	
+
 	private ElevesLovegos convertToEleveLovegosElastic(User user) {
 		List<String> motifs = new ArrayList<String>();
 		for (int i=0;i< user.getMotif().length;i++) {
@@ -158,18 +168,39 @@ public class ManageUsers {
 		}
 		GeoPoint geo = new GeoPoint(user.getGeoLoc().getLat(),user.getGeoLoc().getLon());
 		int age = calculateAge(user.getDateNaissance(),LocalDate.now());
-		return new ElevesLovegos(user.get_id(), "logos", user.getType(), age, user.getGenre(), geo, user.getStatutPremium(),motifs);
+		return new ElevesLovegos(user.get_id(), getUserConnection(user), user.getType(), age, user.getGenre(), geo, user.getStatutPremium(),motifs);
 	}
-	
-	private static int calculateAge(LocalDate birthDate, LocalDate currentDate) {
-        if ((birthDate != null) && (currentDate != null)) {
-            return Period.between(birthDate, currentDate).getYears();
-        } else {
-            return 0;
-        }
-    }
 
-	
+	public String getUserConnection(User u) {
+		ConnectionUsers sessions = sessionService.getConnectionsByUserID(u.get_id());
+		boolean connected = false;
+		for(int i=0;i< sessions.getSessions().length;i++) {
+			if(sessions.getSessions()[i].getSession().getDateDeconnexion() == null) {
+				connected = true;
+				for(int j=i+1;j< sessions.getSessions().length;j++) {
+					if(sessions.getSessions()[j].getSession().getDateDeconnexion() == null 
+							&& !sessions.getSessions()[i].getSession().getPlateforme().equalsIgnoreCase(sessions.getSessions()[j].getSession().getPlateforme())) {
+						return "both";
+					}
+				}
+				return sessions.getSessions()[i].getSession().getPlateforme();
+			}
+		}
+		if(!connected) {
+			return "none";
+		}
+		return "";
+	}
+
+	private static int calculateAge(LocalDate birthDate, LocalDate currentDate) {
+		if ((birthDate != null) && (currentDate != null)) {
+			return Period.between(birthDate, currentDate).getYears();
+		} else {
+			return 0;
+		}
+	}
+
+
 
 
 }
