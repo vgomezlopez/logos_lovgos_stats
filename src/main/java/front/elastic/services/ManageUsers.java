@@ -60,6 +60,7 @@ public class ManageUsers {
 					.addTransportAddress(new TransportAddress(InetAddress.getByName("localhost"), 9300))
 					.addTransportAddress(new TransportAddress(InetAddress.getByName("localhost"), 9301));
 
+			// on indique que les coordonnées géographiques sont de type geo_point
 			String url = "http://localhost:9200/"+index;
 			if(new DefaultHttpClient().execute(new HttpGet(url)).getStatusLine().getStatusCode()==404) {
 				HttpClient client1 = new DefaultHttpClient();
@@ -174,16 +175,18 @@ public class ManageUsers {
 	public String getUserConnection(User u) {
 		ConnectionUsers sessions = sessionService.getConnectionsByUserID(u.get_id());
 		boolean connected = false;
-		for(int i=0;i< sessions.getSessions().length;i++) {
-			if(sessions.getSessions()[i].getSession().getDateDeconnexion() == null) {
-				connected = true;
-				for(int j=i+1;j< sessions.getSessions().length;j++) {
-					if(sessions.getSessions()[j].getSession().getDateDeconnexion() == null 
-							&& !sessions.getSessions()[i].getSession().getPlateforme().equalsIgnoreCase(sessions.getSessions()[j].getSession().getPlateforme())) {
-						return "both";
+		if(sessions != null) {
+			for(int i=0;i< sessions.getSessions().length;i++) {
+				if(sessions.getSessions()[i].getSession().getDateDeconnexion() == null) {
+					connected = true;
+					for(int j=i+1;j< sessions.getSessions().length;j++) {
+						if(sessions.getSessions()[j].getSession().getDateDeconnexion() == null 
+								&& !sessions.getSessions()[i].getSession().getPlateforme().equalsIgnoreCase(sessions.getSessions()[j].getSession().getPlateforme())) {
+							return "both";
+						}
 					}
+					return sessions.getSessions()[i].getSession().getPlateforme();
 				}
-				return sessions.getSessions()[i].getSession().getPlateforme();
 			}
 		}
 		if(!connected) {

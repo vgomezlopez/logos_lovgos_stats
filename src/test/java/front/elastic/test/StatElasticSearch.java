@@ -37,8 +37,8 @@ public class StatElasticSearch {
 		List<User> liste = usersService.getAllUsers();
 		
 		List<User> liste1 = new ArrayList<User>();
-//		liste1.add(usersService.getUserByID(1));
-//		liste1.add(usersService.getUserByID(1003));
+		liste1.add(usersService.getUserByID(1));
+		liste1.add(usersService.getUserByID(1003));
 		liste1.add(usersService.getUserByID(14500));
 		liste1.add(usersService.getUserByID(13544));
 		liste1.add(usersService.getUserByID(12555));
@@ -46,7 +46,7 @@ public class StatElasticSearch {
 		liste1.add(usersService.getUserByID(11544));
 		for(User u: liste1) {
 			System.out.println(u);
-//			m.addUser(u);
+			m.addUser(u);
 //			m.deleteUtilisateur(u.get_id());
 		}
 		
