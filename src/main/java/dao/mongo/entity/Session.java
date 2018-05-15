@@ -2,6 +2,7 @@ package dao.mongo.entity;
 
 import java.lang.annotation.Target;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -13,9 +14,9 @@ public class Session {
 	
 	public String plateforme;
 	
-	public LocalDate dateConnexion;
+	public LocalDateTime dateConnexion;
 	
-	public LocalDate dateDeconnexion;
+	public LocalDateTime dateDeconnexion;
 	
 	private Geolocalisation geoLoc;
 	
@@ -25,7 +26,7 @@ public class Session {
 	}
 
 
-	public Session(String plateforme, LocalDate dateConnexion, LocalDate dateDeconnexion, Geolocalisation geoLoc) {
+	public Session(String plateforme, LocalDateTime dateConnexion, LocalDateTime dateDeconnexion, Geolocalisation geoLoc) {
 		super();
 		this.plateforme = plateforme;
 		this.dateConnexion = dateConnexion;
@@ -51,22 +52,22 @@ public class Session {
 	}
 
 
-	public LocalDate getDateConnexion() {
+	public LocalDateTime getDateConnexion() {
 		return dateConnexion;
 	}
 
 
-	public void setDateConnexion(LocalDate dateConnexion) {
+	public void setDateConnexion(LocalDateTime dateConnexion) {
 		this.dateConnexion = dateConnexion;
 	}
 
 
-	public LocalDate getDateDeconnexion() {
+	public LocalDateTime getDateDeconnexion() {
 		return dateDeconnexion;
 	}
 
 
-	public void setDateDeconnexion(LocalDate dateDeconnexion) {
+	public void setDateDeconnexion(LocalDateTime dateDeconnexion) {
 		this.dateDeconnexion = dateDeconnexion;
 	}
 

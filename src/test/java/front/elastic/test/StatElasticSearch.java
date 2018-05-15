@@ -24,37 +24,55 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import dao.mongo.entity.User;
 import dao.mongo.services.UsersService;
+import front.elastic.services.ManageCalculLoveConnex;
+import front.elastic.services.ManageConnexion;
 import front.elastic.services.ManageUsers;
 import front.elastic.users.ElevesLovegos;
+import front.elastic.users.HistoriqueConnex;
 
 public class StatElasticSearch {
 
 	public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
 		ManageUsers m = new ManageUsers();
+		ManageConnexion c = new ManageConnexion();
+		ManageCalculLoveConnex lc = new ManageCalculLoveConnex();
 		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("mongo-context.xml");
 		UsersService usersService = ctx.getBean(UsersService.class);
 		
-		List<User> liste = usersService.getAllUsers();
 		
-		List<User> liste1 = new ArrayList<User>();
-		liste1.add(usersService.getUserByID(702));
-		liste1.add(usersService.getUserByID(4802));
-		liste1.add(usersService.getUserByID(14500));
-		liste1.add(usersService.getUserByID(13544));
-		liste1.add(usersService.getUserByID(12555));
-		liste1.add(usersService.getUserByID(13101));
-		liste1.add(usersService.getUserByID(11544));
-		liste1.add(usersService.getUserByID(13196));
-		for(User u: liste1) {
+		
+//		List<User> liste = usersService.getAllUsers();
+//		
+//		List<User> liste1 = new ArrayList<User>();
+//		liste1.add(usersService.getUserByID(702));
+//		liste1.add(usersService.getUserByID(4802));
+//		liste1.add(usersService.getUserByID(14500));
+//		liste1.add(usersService.getUserByID(13544));
+//		liste1.add(usersService.getUserByID(12555));
+//		liste1.add(usersService.getUserByID(13101));
+//		liste1.add(usersService.getUserByID(11544));
+//		liste1.add(usersService.getUserByID(13196));
+//		for(User u: liste1) {
 //			System.out.println(u);
 //			m.addUser(u);
 //			m.deleteUtilisateur(u.get_id());
+//		}
+		
+//		User u = usersService.getUserByID(13196);
+//		String connection = m.getUserConnection(u);
+//		System.out.println(connection);
+		
+		List<HistoriqueConnex> listeConnex = c.getNbrConnectionAllDates();
+		for(HistoriqueConnex h : listeConnex) {
+			System.out.println(h);
+//		c.addHistoriqueConnexion(h);
 		}
 		
-		User u = usersService.getUserByID(13196);
-		String connection = m.getUserConnection(u);
-		System.out.println(connection);
+		lc.addCalculLoveConnex(listeConnex);
 		
+		System.out.println(lc.getDureeConnexMoyen());
+		
+//		System.out.println(lc.getNbrConnectionMoyen(listeConnex));
 
 		
 //		// UPDATE DOCUMENT

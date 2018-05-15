@@ -2,16 +2,26 @@ package dao.mongo.test;
 
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.joda.time.Duration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import dao.mongo.entity.ConnectionUsers;
+import dao.mongo.entity.Loves;
+import dao.mongo.entity.Session;
 import dao.mongo.entity.User;
+import dao.mongo.services.LovesService;
 import dao.mongo.services.SessionService;
 import dao.mongo.services.UsersService;
+import front.elastic.services.ManageConnexion;
+import front.elastic.users.HistoriqueConnex;
 
 
 public class StatTest {
@@ -20,14 +30,43 @@ public class StatTest {
 				ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("mongo-context.xml");
 				UsersService usersService = ctx.getBean(UsersService.class);
 				SessionService usersConnection = ctx.getBean(SessionService.class);
+				LovesService lovesService = ctx.getBean(LovesService.class);
 				
-				ConnectionUsers c = usersConnection.getConnectionsByUserID(14500);
+				ManageConnexion mc = new ManageConnexion();
+				
+				Loves love = lovesService.getLovesByID(4);
+				System.out.println(love);
+				
+//				ConnectionUsers c = usersConnection.getConnectionsByUserID(14500);
 //				System.out.println(c);
 				
-				List<ConnectionUsers> liste = usersConnection.getAllUserConnections();
-				for(ConnectionUsers u: liste) {
-					System.out.println(u);
-				}
+//				List<ConnectionUsers> liste = usersConnection.getAllUserConnections();
+//				for(ConnectionUsers u: liste) {
+//					System.out.println(u);
+//				}
+				
+//				LocalDate d = LocalDate.of(2017,02,25);
+//				List<Session> sessions = usersConnection.getAllSessionByDate(d);
+//				for(Session s :  sessions) {
+//					System.out.println(s);
+//				}
+				
+				
+//				List<HistoriqueConnex> historiqueConnexions =  new ArrayList<HistoriqueConnex>();
+//				historiqueConnexions = mc.getNbrConnectionAllDates();
+//				for(HistoriqueConnex h : historiqueConnexions) {
+//					System.out.println(h);
+//				}
+				
+//				System.out.println(usersConnection.getDateConnexionMin());
+//				System.out.println(usersConnection.getDateConnexionMax());
+				
+				
+//				LocalDateTime date = LocalDateTime.of(2017,02,25,15,11,22);
+//				LocalDate d1 = LocalDate.of(date.getYear(),date.getMonth(),date.getDayOfMonth());
+//				System.out.println((d1));
+				
+				
 				
 		//		List<String> coordinates = new ArrayList<String>();
 		//		coordinates.add("15.45");
@@ -43,9 +82,9 @@ public class StatTest {
 		//		
 		////		usersService.createUser(u1);
 		//		
-			User u2 = usersService.getUserByID(14500);
-			System.out.println(u2);
-			
+//			User u2 = usersService.getUserByID(14500);
+//			System.out.println(u2);
+//			
 //			List<User> liste = usersService.getAllUsers();
 //			for(User u: liste) {
 //				System.out.println(u);

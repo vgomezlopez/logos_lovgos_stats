@@ -8,8 +8,6 @@ import java.net.UnknownHostException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,22 +33,27 @@ import dao.mongo.entity.ConnectionUsers;
 import dao.mongo.entity.Session;
 import dao.mongo.entity.Sessions;
 import dao.mongo.entity.User;
+import dao.mongo.services.LovesService;
 import dao.mongo.services.SessionService;
+import front.elastic.users.Eleves;
 import front.elastic.users.ElevesLovegos;
 import front.elastic.users.HistoriqueConnex;
 
-public class ManageConnexion {
-	
+public class ManageCalculLoveConnex {
+
 	private TransportClient client;
-	private String index = "connex_historique";
+	private String index = "nbr_love_connex";
 	private String type = "default";
 	private SessionService sessionService;
+	private LovesService lovesService;
+	private ManageConnexion manageConnex;
 
 	@SuppressWarnings({ "resource", "unchecked" })
-	public ManageConnexion() throws IOException {
+	public ManageCalculLoveConnex() throws IOException {
 
 		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("mongo-context.xml");
 		sessionService = ctx.getBean(SessionService.class);
+		lovesService = ctx.getBean(LovesService.class);
 
 
 		// se connecter à Elastic Search
@@ -64,36 +67,57 @@ public class ManageConnexion {
 			e.printStackTrace();
 		}
 	}
-	
-	public List<HistoriqueConnex> getNbrConnectionAllDates(){
-		List<ConnectionUsers> allSessions = sessionService.getAllUserConnections();
-		List<HistoriqueConnex> historiqueConnexions =  new ArrayList<HistoriqueConnex>();
-//		LocalDate startDate = sessionService.getDateConnexionMin();
-		LocalDate startDate = LocalDate.of(2018, 05, 10);
-		LocalDate endDate = sessionService.getDateConnexionMax();
-		
-		for(LocalDate date= startDate; date.isBefore(endDate); date = date.plusDays(1)) {
-			List<Session> sessionsByDate = sessionService.getAllSessionByDate(date);
-			HistoriqueConnex h = new HistoriqueConnex(date, sessionsByDate.size());
-			historiqueConnexions.add(h);
-		}
-		return historiqueConnexions;
-		
-	}
-	
-	public void addHistoriqueConnexion(HistoriqueConnex u) throws IOException {
+
+	public void addCalculLoveConnex(List<HistoriqueConnex> listeConnex) throws IOException {
 		XContentBuilder xb =  XContentFactory.jsonBuilder().startObject();
-		xb.field("dateJour", u.getDateJour())
-		.field("nbConnections", u.getNbConnections());
+		xb.field("moyCon", getDureeConnexMoyen())
+		.field("nbLoves", lovesService.getAllLoves().size())
+		.field("nbVisites", getNbrConnectionMoyen(listeConnex));
 		xb.endObject();
 		client.prepareIndex(index,type).setSource(xb).get();
 
 	}
-	
-	
 
-	
-	
-	
-	
+
+	public Double getNbrConnectionMoyen(List<HistoriqueConnex> connex) {
+		double numerateur=0;
+		double denominateur = connex.size();
+		for(HistoriqueConnex c : connex) {
+			numerateur+=c.getNbConnections();
+		}
+		return numerateur/denominateur;
+	}
+
+	public double getDureeConnexMoyen() {
+		long numerateur=0;
+		double denominateur=0;
+		List<ConnectionUsers> allSessions = sessionService.getAllUserConnections();
+		List<HistoriqueConnex> historiqueConnexions =  new ArrayList<HistoriqueConnex>();
+		//		LocalDate startDate = sessionService.getDateConnexionMin();
+		LocalDate startDate = LocalDate.of(2018, 05, 10);
+		LocalDate endDate = sessionService.getDateConnexionMax();
+
+		for(LocalDate date= startDate; date.isBefore(endDate); date = date.plusDays(1)) {
+			List<Session> sessionsByDate = sessionService.getAllSessionByDate(date);
+			for(Session s: sessionsByDate) {
+				if(s.getDateDeconnexion() != null) {
+					Duration d = getDurationBySession(s);
+					numerateur += d.getSeconds();
+					denominateur += 1;
+				}
+			}
+
+		}
+		System.out.println("numerateur : "+numerateur+" denominateur : "+denominateur);
+		return numerateur/denominateur;
+	}
+
+	public Duration getDurationBySession(Session s) {
+		Duration duration = Duration.between(s.getDateConnexion(), s.getDateDeconnexion());
+		return duration;
+	}
+
+
+
+
 }
