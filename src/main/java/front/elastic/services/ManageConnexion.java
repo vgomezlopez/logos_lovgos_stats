@@ -22,6 +22,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import dao.mongo.entity.ConnectionUsers;
+import dao.mongo.entity.User;
 import dao.mongo.services.SessionService;
 import front.elastic.users.HistoriqueConnex;
 
@@ -54,12 +55,20 @@ public class ManageConnexion {
 	
 	
 	
-//	public HistoriqueConnex getNbrConnectesByDate (LocalDate date) {
-//		List<ConnectionUsers> sessionsAll = sessionService.get
-//		
-//		return null;
-//	}
+	public Integer getNbrConnectesByDate (LocalDate date) {
+		List<ConnectionUsers> sessionsAll = sessionService.getAllUserConnections();
+		
+		
+		return null;
+	}
 	
+	public Integer getNbrConnectionByUserByDate(User u, LocalDate date) {
+		ConnectionUsers sessions = sessionService.getConnectionsByUserID(u.get_id());
+		
+		
+		return null;
+		
+	}
 	
 	
 	

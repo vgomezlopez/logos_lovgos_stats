@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "connex")
+@Document(collection = "historique")
 public class ConnectionUsers {
 	
 	@Id
