@@ -43,7 +43,7 @@ import io.netty.handler.codec.json.JsonObjectDecoder;
 public class ManageUsers {
 
 	private TransportClient client;
-	private String index = "users2";
+	private String index = "users";
 	private String type = "user";
 	private SessionService sessionService;
 

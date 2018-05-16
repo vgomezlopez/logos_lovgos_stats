@@ -68,8 +68,8 @@ public class ManageConnexion {
 	public List<HistoriqueConnex> getNbrConnectionAllDates(){
 		List<ConnectionUsers> allSessions = sessionService.getAllUserConnections();
 		List<HistoriqueConnex> historiqueConnexions =  new ArrayList<HistoriqueConnex>();
-//		LocalDate startDate = sessionService.getDateConnexionMin();
-		LocalDate startDate = LocalDate.of(2018, 05, 10);
+		LocalDate startDate = sessionService.getDateConnexionMin();
+//		LocalDate startDate = LocalDate.of(2018, 05, 10);
 		LocalDate endDate = sessionService.getDateConnexionMax();
 		
 		for(LocalDate date= startDate; date.isBefore(endDate); date = date.plusDays(1)) {
