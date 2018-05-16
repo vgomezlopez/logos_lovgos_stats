@@ -6,10 +6,15 @@ import java.util.List;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import dao.mongo.entity.Cours;
+import dao.mongo.entity.SuiviCours;
 import dao.mongo.entity.User;
+import dao.mongo.services.CoursService;
+import dao.mongo.services.SuiviCoursService;
 import dao.mongo.services.UsersService;
 import front.elastic.services.ManageCalculLoveConnex;
 import front.elastic.services.ManageConnexion;
+import front.elastic.services.ManageCours;
 import front.elastic.services.ManageUsers;
 import front.elastic.users.HistoriqueConnex;
 
@@ -21,6 +26,9 @@ public class StatsElasticFinal {
 		ManageCalculLoveConnex lc = new ManageCalculLoveConnex();
 		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("mongo-context.xml");
 		UsersService usersService = ctx.getBean(UsersService.class);
+		SuiviCoursService suiviCoursService = ctx.getBean(SuiviCoursService.class);
+		CoursService coursService = ctx.getBean(CoursService.class);
+		ManageCours mcours = new ManageCours();
 		
 		
 		//ajouter tous les utilisateurs (tous types confondus) : création de l'index users
@@ -43,8 +51,12 @@ public class StatsElasticFinal {
 		// si besoin de supprimer un user selon son id
 //			m.deleteUtilisateur(u.get_id());
 		
-		
-			
+		//ajouter tous les cours
+		List<Cours> listeCours = coursService.getAllCours();
+		for(Cours cours : listeCours) {
+			System.out.println(cours);
+			mcours.addCours(cours);
+		}
 			
 			
 	}

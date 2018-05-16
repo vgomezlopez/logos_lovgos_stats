@@ -14,13 +14,18 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import dao.mongo.entity.ConnectionUsers;
+import dao.mongo.entity.Cours;
 import dao.mongo.entity.Loves;
 import dao.mongo.entity.Session;
+import dao.mongo.entity.SuiviCours;
 import dao.mongo.entity.User;
+import dao.mongo.services.CoursService;
 import dao.mongo.services.LovesService;
 import dao.mongo.services.SessionService;
+import dao.mongo.services.SuiviCoursService;
 import dao.mongo.services.UsersService;
 import front.elastic.services.ManageConnexion;
+import front.elastic.services.ManageCours;
 import front.elastic.users.HistoriqueConnex;
 
 
@@ -31,11 +36,24 @@ public class StatTest {
 				UsersService usersService = ctx.getBean(UsersService.class);
 				SessionService usersConnection = ctx.getBean(SessionService.class);
 				LovesService lovesService = ctx.getBean(LovesService.class);
+				SuiviCoursService suiviCoursService = ctx.getBean(SuiviCoursService.class);
+				CoursService coursService = ctx.getBean(CoursService.class);
 				
 				ManageConnexion mc = new ManageConnexion();
+				ManageCours mcou = new ManageCours();
+				Cours c = coursService.getCoursByID(597);
+				mcou.addCours(c);
 				
-				Loves love = lovesService.getLovesByID(4);
-				System.out.println(love);
+				
+				
+				
+				List<SuiviCours> liste = suiviCoursService.getSuiviCoursByIdCours(597);
+				for (SuiviCours s : liste) {
+					System.out.println(s.toString());
+				}
+				
+//				Loves love = lovesService.getLovesByID(4);
+//				System.out.println(love);
 				
 //				ConnectionUsers c = usersConnection.getConnectionsByUserID(14500);
 //				System.out.println(c);
